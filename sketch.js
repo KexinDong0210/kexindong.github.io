@@ -50,9 +50,9 @@ function draw() {
   text("Make your frist outfit", windowWidth/3, 420);
   textSize(20);
 
-  text("Red", windowWidth/3, 450);
-  text("Blue", windowWidth/3, 510);
-  text("Green", windowWidth/3, 570);
+  text("Red Value", windowWidth/3, 450);
+  text("Blue Value", windowWidth/3, 510);
+  text("Green Value", windowWidth/3, 570);
 
   redVal = sliderRed.value();
   blueVal = sliderBlue.value();
