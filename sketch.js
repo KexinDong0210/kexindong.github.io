@@ -1,105 +1,82 @@
 
-/**In this example, we use PubNub to connect to three pages, and show three different types of visualizations on each sketch. **/
+let channelName = "welcomePage";
 
-let channelName = "page1";
-let cursors = [];
+let nameInput 
 
-let x;
-let y;
-let who; 
+let redVal;
+let greenVal;
+let blueVal;
+
+let you;
 
 function setup() {
 
     createCanvas(windowWidth, windowHeight);
 
-    // listen for messages coming through the subcription feed on this specific channel. 
-    dataServer.addListener({ message: readIncoming});
-    dataServer.subscribe({ channels: [channelName] });
+    nameInput = createInput();
+    nameInput.style('font-size', '30px');
+    nameInput.position(windowWidth/3, 325);
 
-    // create a new JSON object to store our data
-    new allCursors(mouseX,mouseY,dataServer.getUUID())
+    sliderRed = createSlider(0, 255, 255, 1);
+    sliderRed.position(windowWidth/3, 470);
+    sliderRed.style('width', '80px');
+    sliderBlue = createSlider(0, 255, 255, 1);
+    sliderBlue.position(windowWidth/3, 530);
+    sliderBlue.style('width', '80px');
+    sliderGreen = createSlider(0, 255, 255, 1);
+    sliderGreen.position(windowWidth/3, 590);
+    sliderGreen.style('width', '80px');
 
-    textSize(80);
-    textAlign(CENTER);
-    fill(255,200,200);
-
-    text("This is page 1", windowWidth/2, windowHeight/2);
-
-    let page2 = createA('/../_pageTwo/index.html', 'Go to page 2');
-    page2.position(100, 300);
-  
-
-
-    dataServer.addListener({ message: readIncoming});
-    dataServer.subscribe({ channels: [channelName] });
-  
-    // create a new JSON object to store our data
-    new allCursors(mouseX,mouseY,dataServer.getUUID())
+    submitButton = createButton("Enter drawing place");
+    submitButton.position(windowWidth/3, 650);
+    submitButton.style('font-size', '30px');
   
   }
   
 function draw() {
+  background(redVal, blueVal, greenVal);
 
-  background(255);
-  text("This is page 1 with crosshairs", windowWidth/2, windowHeight/2);
+  textSize(60);
 
+  textAlign(CENTER);
 
-  sendTheMessage(); // send the message with the cursor location every 100ms.   
+  text("Welcome! Let's work together to draw a circle!", windowWidth/2, 200);
 
-  for (let i = 0; i < cursors.length; i++) { // loop through all the cursors and show them on the page
-    stroke(0);
-    strokeWeight(1);
-    // draw a small crosshair
-    line(cursors[i].x,cursors[i].y-5,cursors[i].x,cursors[i].y+5);
-    line(cursors[i].x-5,cursors[i].y,cursors[i].x+5,cursors[i].y);
-    }
+  textSize(30);
+  textAlign(LEFT);
+  text("Enter your name", windowWidth/3, 300);
+ 
+
+  text("Make your frist outfit", windowWidth/3, 420);
+  textSize(20);
+
+  text("Red value", windowWidth/3, 450);
+  text("Blue value", windowWidth/3, 510);
+  text("Green value", windowWidth/3, 570);
+
+  redVal = sliderRed.value();
+  blueVal = sliderBlue.value();
+  greenVal = sliderGreen.value();
+
+  // on submit enter the information
+  submitButton.mousePressed(sendTheMessage);
+
 }
-  
-  // PubNub logic below
+ 
 function sendTheMessage() {
   // Send Data to the server to draw it in all other canvases
-  dataServer.publish({
-    channel: channelName,
-    message: {
-      x: mouseX,
-      y: mouseY,
-    },
-  });
-}
 
-function readIncoming(inMessage) {
-  // when new data comes in it triggers this function,
-  // we call this function in the setup
+  // check to see if they enter their name
+  if (nameInput.value() != "") { 
+    // if they did, save their name to the variable "you"
+    you = nameInput.value();
+    // load a new page when you press submit
+    window.location.href = "/../_pageTwo/index.html?you="+you+"&r="+redVal+"&g="+greenVal+"&b="+blueVal; 
 
-  /*since an App can have many channels, we ensure that we are listening
-  to the correct channel */
-
-  if (inMessage.channel == channelName) {
-
-   x = inMessage.message.x // get the mouseX value from the other people
-   y = inMessage.message.y // get the mouseY value from the other people
-   who = inMessage.publisher; // who sent the message
-
- //  console.log(inMessage); //logging for information
-
-   let newinput = true; // we are checking to see if this person who sent the message is already on the page. 
-
-      for(let i = 0; i<cursors.length;i++) { // loop through all the IDs that have sent us messages before
-        if(who==cursors[i].who) { // if who is already in our array, update the x & y values
-          cursors[i].x = x;
-          cursors[i].y = y;
-          newinput = false;    // set the boolean to false since this is not a new user
-        }
-      }
-      if(newinput) { // if this is a new user, create a new JSON object that we add to our array
-        cursors.push(new allCursors(x,y, who));
-      }
+  } else {
+    // if they have no entered their name, create an alert and ask them to enter their name
+    window.alert("Please enter your name!");
   }
-}
-function allCursors(x,y,who){ // creates a new JSON object for us
  
-  this.x = x; // this is shorthand for saying "this object"
-  this.y = y;
-  this.who = who;
 
 }
